@@ -2,16 +2,21 @@ import React from "react";
 
 const variants = {
     primary: `
-        bg-[#248B8F] text-white shadow-sm
-        hover:bg-[#1D7275] hover:shadow
-        disabled:bg-[#F2F2F2] disabled:text-[#9CA3AF]
-        disabled:shadow-none disabled:hover:bg-[#F2F2F2]
+        bg-primary text-white shadow-sm
+        hover:bg-primary-hover hover:shadow
+        disabled:bg-bg-disabled disabled:text-text-disabled
+        disabled:shadow-none disabled:hover:bg-bg-disabled
     `,
     outline: `
-        bg-white text-[#248B8F] border border-[#248B8F]
-        hover:bg-[#E6F4F2]
-        disabled:border-[#D9D9D9] disabled:text-[#9CA3AF]
-        disabled:bg-[#F2F2F2] disabled:hover:bg-[#F2F2F2]
+        bg-white text-primary border border-primary
+        hover:bg-primary-light
+        disabled:border-border-light disabled:text-text-disabled
+        disabled:bg-bg-disabled disabled:hover:bg-bg-disabled
+    `,
+    secondary: `
+        bg-bg-subtle text-text-body border border-border-light
+        hover:bg-bg-disabled
+        disabled:text-text-disabled disabled:bg-bg-disabled
     `,
 };
 
@@ -32,9 +37,10 @@ const Button = ({
             onClick={onClick}
             className={`
                 ${fullWidth ? "w-full" : ""}
-                h-14 px-6 rounded-lg
+                h-12 px-6 rounded-xl
                 text-[14px] font-medium
-                transition-colors
+                transition-all duration-200
+                flex items-center justify-center gap-2
                 cursor-pointer
                 disabled:cursor-not-allowed
                 ${variants[variant] || variants.primary}

@@ -13,6 +13,8 @@ const Input = ({
     icon,
     error = "",
     disabled = false,
+    readOnly = false,
+    variant = "default", // "default" | "filled"
     autoComplete,
     className = "",
     ...props
@@ -22,26 +24,25 @@ const Input = ({
     const isPassword = type === "password";
     const inputType = isPassword && showPassword ? "text" : type;
 
+    const isFilledVariant = variant === "filled" || disabled || readOnly;
+
     return (
         <div className={`relative w-full ${className}`}>
-
             {label && (
                 <label
                     htmlFor={id || name}
-                    className="block mb-[clamp(4px,1vh,8px)] text-[14px] leading-[100%] font-medium text-[#0B1117]"
+                    className="block mb-2 text-[14px] leading-tight font-medium text-text-main"
                 >
                     {label}
-                    {required && <span className="text-[#D92D20]"> *</span>}
+                    {required && <span className="text-error"> *</span>}
                 </label>
             )}
 
-            {/* Height scales with screen height */}
-            <div className="relative w-full h-[clamp(44px,6.5vh,56px)]">
-
+            <div className="relative w-full h-12">
                 {icon && (
                     <Icon
                         icon={icon}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4B5563] text-[20px] pointer-events-none"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-text-disabled text-[20px] pointer-events-none"
                     />
                 )}
 
@@ -53,18 +54,24 @@ const Input = ({
                     onChange={onChange}
                     placeholder={placeholder}
                     disabled={disabled}
+                    readOnly={readOnly}
                     autoComplete={autoComplete}
                     aria-invalid={!!error}
                     className={`
                         w-full h-full
-                        ${icon ? "pl-12" : "pl-4"}
-                        ${isPassword ? "pr-12" : "pr-4"}
-                        rounded-lg border
-                        ${error ? "border-[#D92D20] focus:border-[#D92D20]" : "border-[#D9D9D9] focus:border-[#248B8F]"}
-                        bg-white outline-none text-[14px] text-[#374151]
-                        placeholder:text-[#9CA3AF]
-                        disabled:bg-[#F3F4F6] disabled:cursor-not-allowed
-                        transition-colors
+                        ${icon ? "pl-11" : "pl-4"}
+                        ${isPassword ? "pr-11" : "pr-4"}
+                        rounded-xl border text-[14px] outline-none transition-colors
+                        ${
+                            error
+                                ? "border-error focus:border-error focus:ring-1 focus:ring-error"
+                                : isFilledVariant
+                                ? "border-border-subtle bg-bg-input text-text-body focus:border-border-light"
+                                : "border-border-light bg-white text-text-main focus:border-primary focus:ring-1 focus:ring-primary"
+                        }
+                        placeholder:text-text-disabled
+                        disabled:bg-bg-input disabled:text-text-body disabled:cursor-not-allowed
+                        read-only:bg-bg-input read-only:text-text-body
                     `}
                     {...props}
                 />
@@ -73,7 +80,7 @@ const Input = ({
                     <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-[#4B5563] hover:text-[#111827] cursor-pointer"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text-main cursor-pointer"
                         aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                         <Icon icon={showPassword ? "charm:eye" : "charm:eye-slash"} className="text-[20px]" />
@@ -81,9 +88,8 @@ const Input = ({
                 )}
             </div>
 
-            {/* Absolute, so showing an error never moves anything below it */}
             {error && (
-                <p className="absolute left-0 top-full mt-1 text-[12px] leading-3.5 text-[#D92D20]">
+                <p className="mt-1.5 text-[12px] leading-tight text-error">
                     {error}
                 </p>
             )}
