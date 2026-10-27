@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useMemo, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Icon } from "@iconify/react";
 import logo from "../../assets/logo.svg";
 import Stepper from "../../components/Stepper/Stepper";
 import Input from "../../components/Input/Input";
@@ -13,6 +14,7 @@ import FileUpload from "../../components/FileUpload/FileUpload";
 import StatusCard from "../../components/StatusCard/StatusCard";
 import Timeline from "../../components/Timeline/Timeline";
 import ContactSupportModal from "../../components/ContactSupportModal/ContactSupportModal";
+import ForgetPasswordSkeleton from "./ForgetPasswordSkeleton";
 
 const REGISTERED_EMAIL = "admin@stacklycare.com";
 const MAX_CHARS = 1024;
@@ -35,6 +37,32 @@ const STATIC_REQUESTED_ON = "30 Sep 2026, 05:30 PM";
 
 const ForgetPassword = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const forceSkeleton = searchParams.get("skeleton") === "true";
+
+  // Loading state on page reload / initial mount (displays skeleton loader)
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (forceSkeleton) {
+      setIsLoading(true);
+      return;
+    }
+
+    // Show skeleton on reload / mount for 1.2s then display content
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [forceSkeleton]);
+
+  const handleSimulateReload = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+  };
 
   // Active step: 1 = Raise Request, 2 = Verification, 3 = Recovery Status
   const [currentStep, setCurrentStep] = useState(1);
@@ -341,10 +369,14 @@ const ForgetPassword = () => {
     }
   }, [recoverySubState]);
 
+  if (isLoading) {
+    return <ForgetPasswordSkeleton step={currentStep} />;
+  }
+
   return (
-    <div className="min-h-screen bg-bg-page py-6 sm:py-10 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center">
+    <div className="min-h-screen bg-bg-page py-6 sm:py-10 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center animate-in fade-in duration-300">
       {/* Top Bar */}
-      <div className="w-full max-w-[1120px] mb-3 sm:mb-4 flex items-center justify-between">
+      <div className="w-full max-w-280 mb-3 sm:mb-4 flex items-center justify-between min-h-9 h-9">
         {currentStep !== 3 ? (
           <BackLink to="/login" label="Back to Sign In" />
         ) : (
@@ -352,6 +384,9 @@ const ForgetPassword = () => {
             Step 3 of 3 • Recovery Status
           </div>
         )}
+
+        {/* Right Action / Preview Bar */}
+        <div className="flex items-center gap-2">
 
         {/* State Quick Switcher for Testing Step 2 & Step 3 */}
         {currentStep === 2 && (
@@ -424,18 +459,30 @@ const ForgetPassword = () => {
             </button>
           </div>
         )}
+
+          {/* Quick Reload Simulator button */}
+          <button
+            type="button"
+            onClick={handleSimulateReload}
+            className="hidden sm:flex items-center gap-1.5 text-[12px] bg-white border border-border-light rounded-lg px-2.5 py-1 shadow-2xs text-text-muted hover:text-text-main hover:bg-bg-subtle cursor-pointer transition-colors font-medium"
+            title="Simulate page reload to view skeleton loader"
+          >
+            <Icon icon="solar:restart-linear" className="text-[14px]" />
+            <span>Reload</span>
+          </button>
+        </div>
       </div>
 
       {/* Main Centered Container Card */}
-      <div className="w-full max-w-[1120px] bg-bg-card rounded-2xl sm:rounded-3xl border border-border-light shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-border-subtle lg:min-h-[660px]">
+      <div className="w-full max-w-280 bg-bg-card rounded-2xl sm:rounded-3xl border border-border-light shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-border-subtle lg:h-165">
           
           {/* ================= LEFT COLUMN ================= */}
-          <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-between">
+          <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-between h-full">
             {/* Top Branding Section */}
             <div>
               {/* Brand Logo */}
-              <div className="flex items-center justify-center gap-3">
+              <div className="h-8 flex items-center justify-center gap-3">
                 <img
                   src={logo}
                   alt="Stackly Care Plus"
@@ -456,7 +503,7 @@ const ForgetPassword = () => {
                 <h1 className="text-[26px] sm:text-[30px] font-bold text-text-main tracking-tight leading-tight">
                   Password recovery
                 </h1>
-                <p className="mt-3 text-[14px] text-text-muted leading-relaxed max-w-[340px] mx-auto">
+                <p className="mt-3 text-[14px] text-text-muted leading-relaxed max-w-85 mx-auto">
                   Raise a request with our support team to regain access to your Admin Account
                 </p>
               </div>
@@ -481,206 +528,206 @@ const ForgetPassword = () => {
           </div>
 
           {/* ================= RIGHT COLUMN ================= */}
-          <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-between bg-white">
-            <div className="flex flex-col h-full justify-between">
-              <div>
-                {/* Top Stepper */}
+          <div className="p-6 sm:p-8 lg:p-12 flex flex-col justify-between bg-white h-full overflow-hidden">
+            <div className="flex flex-col h-full justify-between overflow-hidden">
+              {/* Top Stepper */}
+              <div className="h-10 flex items-center mb-8 sm:mb-6 shrink-0">
                 <Stepper
                   steps={STEPS}
                   currentStep={currentStep}
                   onStepClick={handleStepClick}
-                  className="mb-8 sm:mb-9"
                 />
+              </div>
 
-                {/* ---------------- STEP 1: Raise Request ---------------- */}
-                {currentStep === 1 && (
-                  <form onSubmit={handleRaiseRequestSubmit} noValidate className="flex flex-col justify-between">
-                    <div>
-                      {/* Registered Email Field */}
-                      <div className="mb-6">
-                        <Input
-                          label="Registered Email Address"
-                          name="email"
-                          type="email"
-                          value={REGISTERED_EMAIL}
-                          readOnly
-                          disabled
-                          icon="solar:letter-linear"
-                        />
-                      </div>
-
-                      {/* Additional Details Textarea */}
-                      <div className="mb-6">
-                        <Textarea
-                          label="Additional Details"
-                          required
-                          placeholder="Please describe your password reset issue or any additional information you'd like to share."
-                          value={details}
-                          onChange={(e) => setDetails(e.target.value)}
-                          maxLength={MAX_CHARS}
-                          error={step1Validation.error}
-                          rows={6}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Submit Details Button */}
-                    <div className="mt-8 lg:mt-10">
-                      <Button
-                        type="submit"
-                        disabled={!step1Validation.isValid}
-                        className="w-full"
-                      >
-                        Submit Details
-                      </Button>
-                    </div>
-                  </form>
-                )}
-
-                {/* ---------------- STEP 2: Verification ---------------- */}
-                {currentStep === 2 && (
-                  <form onSubmit={handleVerificationSubmit} noValidate className="flex flex-col justify-between">
-                    <div>
-                      {/* 1. Registered Phone Number */}
-                      <div className="mb-5 sm:mb-6">
-                        <PhoneInput
-                          label="Registered Phone Number"
-                          required
-                          value={phone}
-                          onChange={(formatted, raw) => {
-                            setPhone(formatted);
-                            setPhoneRaw(raw);
-                          }}
-                          error={step2Validation.phoneError}
-                        />
-                      </div>
-
-                      {/* 2. Last Login Date (if known) */}
-                      <div className="mb-5 sm:mb-6">
-                        <DateInput
-                          label="Last Login Date (if known)"
-                          value={lastLoginDate}
-                          onChange={(formatted, iso) => {
-                            setLastLoginDate(formatted);
-                            setRawIsoDate(iso);
-                          }}
-                          error={step2Validation.dateError}
-                        />
-                      </div>
-
-                      {/* 3. Additional Verification Documents */}
-                      <div className="mb-6">
-                        <FileUpload
-                          label="Additional Verification Documents"
-                          required
-                          file={uploadedFile}
-                          onFileSelect={(fileData) => setUploadedFile(fileData)}
-                          onFileRemove={() => setUploadedFile(null)}
-                          error={step2Validation.fileError}
-                          tooltipContent="Upload ID proof, authorization letter, or other supporting documents for verification."
-                        />
-                      </div>
-                    </div>
-
-                    {/* Submit Request Button */}
-                    <div className="mt-8 lg:mt-10">
-                      <Button
-                        type="submit"
-                        disabled={!step2Validation.isFilled && !step2Submitted}
-                        className="w-full"
-                      >
-                        Submit Request
-                      </Button>
-                    </div>
-                  </form>
-                )}
-
-                {/* ---------------- STEP 3: Recovery Status ---------------- */}
-                {currentStep === 3 && (
-                  <div className="flex flex-col justify-between h-full space-y-6">
-                    <div className="space-y-6">
-                      {/* Status Card (ID & Date metadata) */}
-                      <StatusCard
-                        status={statusCardConfig.status}
-                        title={statusCardConfig.title}
-                        description={statusCardConfig.description}
-                        requestId={STATIC_REQUEST_ID}
-                        requestedOn={STATIC_REQUESTED_ON}
+              {/* ---------------- STEP 1: Raise Request ---------------- */}
+              {currentStep === 1 && (
+                <form onSubmit={handleRaiseRequestSubmit} noValidate className="flex-1 flex flex-col justify-between">
+                  <div>
+                    {/* Registered Email Field */}
+                    <div className="mb-6">
+                      <Input
+                        label="Registered Email Address"
+                        name="email"
+                        type="email"
+                        value={REGISTERED_EMAIL}
+                        readOnly
+                        disabled
+                        icon="solar:letter-linear"
                       />
-
-                      {/* Request Status Timeline */}
-                      <div className="pt-1">
-                        <Timeline items={timelineItems} title="Request Status" />
-                      </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="pt-2">
-                      {/* State 1: Verification in Progress */}
-                      {recoverySubState === "verification-in-progress" && (
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsSupportModalOpen(true)}
-                          className="w-full"
-                        >
-                          Contact Support
-                        </Button>
-                      )}
-
-                      {/* State 2: Verification Failed */}
-                      {recoverySubState === "verification-failed" && (
-                        <div className="flex items-center gap-3">
-                          <Button
-                            variant="outline"
-                            onClick={() => setIsSupportModalOpen(true)}
-                            className="flex-1"
-                          >
-                            Contact Support
-                          </Button>
-                          <Button
-                            variant="primary"
-                            onClick={() => setCurrentStep(2)}
-                            className="flex-1"
-                          >
-                            Update & Resubmit Details
-                          </Button>
-                        </div>
-                      )}
-
-                      {/* State 3: Password Reset in Progress */}
-                      {recoverySubState === "reset-in-progress" && (
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsSupportModalOpen(true)}
-                          className="w-full"
-                        >
-                          Contact Support
-                        </Button>
-                      )}
-
-                      {/* State 4: Temporary password generated (Completed) */}
-                      {recoverySubState === "completed" && (
-                        <div className="flex items-center gap-3">
-                          <Button
-                            variant="outline"
-                            onClick={() => setIsSupportModalOpen(true)}
-                            className="flex-1"
-                          >
-                            Contact Support
-                          </Button>
-                          <Button
-                            variant="primary"
-                            onClick={() => navigate("/login")}
-                            className="flex-1"
-                          >
-                            Sign In
-                          </Button>
-                        </div>
-                      )}
+                    {/* Additional Details Textarea */}
+                    <div className="mb-6">
+                      <Textarea
+                        label="Additional Details"
+                        required
+                        placeholder="Please describe your password reset issue or any additional information you'd like to share."
+                        value={details}
+                        onChange={(e) => setDetails(e.target.value)}
+                        maxLength={MAX_CHARS}
+                        error={step1Validation.error}
+                        rows={6}
+                      />
                     </div>
                   </div>
-                )}
-              </div>
+
+                  {/* Submit Details Button */}
+                  <div className="mt-8 lg:mt-10">
+                    <Button
+                      type="submit"
+                      disabled={!step1Validation.isValid}
+                      className="w-full"
+                    >
+                      Submit Details
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {/* ---------------- STEP 2: Verification ---------------- */}
+              {currentStep === 2 && (
+                <form onSubmit={handleVerificationSubmit} noValidate className="flex-1 flex flex-col justify-between">
+                  <div>
+                    {/* 1. Registered Phone Number */}
+                    <div className="mb-5 sm:mb-6">
+                      <PhoneInput
+                        label="Registered Phone Number"
+                        required
+                        value={phone}
+                        onChange={(formatted, raw) => {
+                          setPhone(formatted);
+                          setPhoneRaw(raw);
+                        }}
+                        error={step2Validation.phoneError}
+                      />
+                    </div>
+
+                    {/* 2. Last Login Date (if known) */}
+                    <div className="mb-5 sm:mb-6">
+                      <DateInput
+                        label="Last Login Date (if known)"
+                        value={lastLoginDate}
+                        onChange={(formatted, iso) => {
+                          setLastLoginDate(formatted);
+                          setRawIsoDate(iso);
+                        }}
+                        error={step2Validation.dateError}
+                      />
+                    </div>
+
+                    {/* 3. Additional Verification Documents */}
+                    <div className="mb-6">
+                      <FileUpload
+                        label="Additional Verification Documents"
+                        required
+                        file={uploadedFile}
+                        onFileSelect={(fileData) => setUploadedFile(fileData)}
+                        onFileRemove={() => setUploadedFile(null)}
+                        error={step2Validation.fileError}
+                        tooltipContent="Upload ID proof, authorization letter, or other supporting documents for verification."
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit Request Button */}
+                  <div className="mt-8 lg:mt-10">
+                    <Button
+                      type="submit"
+                      disabled={!step2Validation.isFilled && !step2Submitted}
+                      className="w-full"
+                    >
+                      Submit Request
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {/* ---------------- STEP 3: Recovery Status ---------------- */}
+              {currentStep === 3 && (
+                <div className="flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
+                  {/* Scrollable Status & Timeline Area */}
+                  <div className="flex-1 min-h-0 overflow-y-auto pr-1.5 space-y-4 custom-scrollbar">
+                    {/* Status Card (ID & Date metadata) */}
+                    <StatusCard
+                      status={statusCardConfig.status}
+                      title={statusCardConfig.title}
+                      description={statusCardConfig.description}
+                      requestId={STATIC_REQUEST_ID}
+                      requestedOn={STATIC_REQUESTED_ON}
+                    />
+
+                    {/* Request Status Timeline */}
+                    <div className="pt-1 pb-1">
+                      <Timeline items={timelineItems} title="Request Status" />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons (Pinned at Bottom) */}
+                  <div className="mt-4 pt-2 shrink-0">
+                    {/* State 1: Verification in Progress */}
+                    {recoverySubState === "verification-in-progress" && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsSupportModalOpen(true)}
+                        className="w-full"
+                      >
+                        Contact Support
+                      </Button>
+                    )}
+
+                    {/* State 2: Verification Failed */}
+                    {recoverySubState === "verification-failed" && (
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsSupportModalOpen(true)}
+                          className="flex-1"
+                        >
+                          Contact Support
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={() => setCurrentStep(2)}
+                          className="flex-1"
+                        >
+                          Update & Resubmit Details
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* State 3: Password Reset in Progress */}
+                    {recoverySubState === "reset-in-progress" && (
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsSupportModalOpen(true)}
+                        className="w-full"
+                      >
+                        Contact Support
+                      </Button>
+                    )}
+
+                    {/* State 4: Temporary password generated (Completed) */}
+                    {recoverySubState === "completed" && (
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsSupportModalOpen(true)}
+                          className="flex-1"
+                        >
+                          Contact Support
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={() => navigate("/login")}
+                          className="flex-1"
+                        >
+                          Sign In
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

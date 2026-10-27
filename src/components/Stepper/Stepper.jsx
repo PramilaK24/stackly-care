@@ -39,7 +39,7 @@ const Stepper = ({
                       ? "bg-primary text-white"
                       : isCompleted
                       ? "bg-primary text-white"
-                      : "bg-[#F2F4F7] text-[#98A2B3]"
+                      : "bg-bg-disabled text-text-disabled"
                   }
                 `}
               >
@@ -59,7 +59,7 @@ const Stepper = ({
                       ? "font-semibold text-primary"
                       : isCompleted
                       ? "font-medium text-text-body"
-                      : "font-normal text-[#98A2B3]"
+                      : "font-normal text-text-disabled"
                   }
                 `}
               >
@@ -71,7 +71,7 @@ const Stepper = ({
             {index < steps.length - 1 && (
               <div
                 className={`
-                  h-[1px] flex-1 mx-2 sm:mx-3 transition-colors
+                  h-px flex-1 mx-2 sm:mx-3 transition-colors
                   ${currentStep > index + 1 ? "bg-primary/50" : "bg-border-light"}
                 `}
               />
